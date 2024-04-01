@@ -16,6 +16,7 @@ AIRTABLE_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{TABLE_ID}"
 
 # Function to fetch data from Airtable
 def fetch_data():
+    
     headers = {
         "Authorization": f"Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}"
     }
