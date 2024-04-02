@@ -51,7 +51,7 @@ def validate_email(email):
 
 def validate_phone_number(phone_number):
     # Regular expression for validating phone numbers
-    pattern = r'^\d{10}$'  # Assuming a 10-digit phone number
+    pattern = r'^\d{11}$'  # Assuming a 10-digit phone number
     if re.match(pattern, phone_number):
         return True
     else:
