@@ -8,19 +8,28 @@ import re
 # Airtable API credentials
 AIRTABLE_PERSONAL_ACCESS_TOKEN = 'pat0bujZD5PIV5Apc.51bb880c298b9768dfcbc0e0326f94ad9d6b6b3b7d2b880486179f01d54168c5'
 AIRTABLE_BASE_ID = 'app8pgQ8UWEiusMHE'
-TABLE_ID = 'tblLY6iolwFQ7sCXG'
+CUSTOMERS_TABLE_ID = 'tblLY6iolwFQ7sCXG'
+DRIVERS_TABLE_ID = 'tblBYefamOYeuLmIK'
 
 
 # Airtable API endpoint
-AIRTABLE_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{TABLE_ID}"
+AIRTABLE_CUSTOMERS_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{CUSTOMERS_TABLE_ID}"
+AIRTABLE_DRIVERS_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{DRIVERS_TABLE_ID}"
+
 
 # Function to fetch data from Airtable
-def fetch_data():
+def fetch_data(user_type):
     
     headers = {
         "Authorization": f"Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}"
     }
-    response = requests.get(AIRTABLE_ENDPOINT, headers=headers)
+
+    if user_type == "Driver":
+        response = requests.get(AIRTABLE_CUSTOMERS_ENDPOINT, headers=headers)
+
+    if user_type == "Customer":
+            response = requests.get(AIRTABLE_DRIVERS_ENDPOINT, headers=headers)
+
     data = response.json()
     return data.get('records', [])
 
@@ -34,20 +43,21 @@ def extract_emails(records):
             emails.append(email)
     return emails
 
-# Fetch data from Airtable
-records = fetch_data()
-
-# Extract emails from records
-emails = extract_emails(records)
-
-
+def email_already_exists(email, emails):
+    if email in emails:
+        return True
+    else:
+        return False
+    
 def validate_email(email):
     # Regular expression for validating email addresses
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
     if re.match(pattern, email):
         return True
     else:
         return False
+    
 
 def validate_phone_number(phone_number):
     # Regular expression for validating phone numbers
@@ -81,6 +91,12 @@ def register_user():
 
     if st.button("Register"):
 
+        # Fetch data from Airtable
+        records = fetch_data(user_type=user_type)
+
+        # Extract emails from records
+        emails = extract_emails(records)
+
         if not first_name:
             st.error("First Name Field cannot be empty!")
             return
@@ -92,6 +108,9 @@ def register_user():
             if not validate_email(email):
                 st.error("Please enter a valid email address!")
                 return
+            if email_already_exists(email=email, emails=emails):
+                st.error("This user email address already exist in our  database!")
+                return               
             
         else:
             st.error("Email Field cannot be empty!")
@@ -108,7 +127,6 @@ def register_user():
         if not validate_current_location(current_location):
             st.error("Please enter your current location!")
             return
-
         
         # Prepare data payload
         data = {
@@ -119,8 +137,17 @@ def register_user():
             "phone_number": phone_number,
             "location": current_location
         }
+
+        if user_type == 'Customer':
+            
+            response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3xn808b/", json=data)
+        else:
+            response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3pd5gc3/", json=data)
+
+        
         # Make HTTP POST request to Zapier webhook URL
-        response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3xn808b/", json=data)
+        response = response
+        
 
         if response.status_code == 200:
             st.success(f"Registration successful as {user_type}!")
@@ -136,6 +163,11 @@ def place_order():
     pickup_location_options = ["Accord", "Zoo", "Harmony", "Peak Olam", "Camp"]
     pickup_location = st.selectbox("Pickup Location *", pickup_location_options)
 
+    # Fetch data from Airtable
+    records = fetch_data(user_type="Customer")
+
+    # Extract emails from records
+    emails = extract_emails(records)
     
     if st.button("Place Order"):
 
