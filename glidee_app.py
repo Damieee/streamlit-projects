@@ -3,13 +3,22 @@ import requests
 from Customer import OrderStatusMonitor
 from Driver import DriverMonitor
 import re
+import os
+from dotenv import find_dotenv, load_dotenv
+
+dotenv_path = find_dotenv()
+
+load_dotenv(dotenv_path=dotenv_path)
 
 
-# Airtable API credentials
-AIRTABLE_PERSONAL_ACCESS_TOKEN = 'pat0bujZD5PIV5Apc.51bb880c298b9768dfcbc0e0326f94ad9d6b6b3b7d2b880486179f01d54168c5'
-AIRTABLE_BASE_ID = 'app8pgQ8UWEiusMHE'
-CUSTOMERS_TABLE_ID = 'tblLY6iolwFQ7sCXG'
-DRIVERS_TABLE_ID = 'tblBYefamOYeuLmIK'
+# Airtable and Zapier API credentials
+AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+CUSTOMERS_TABLE_ID = os.getenv("CUSTOMERS_TABLE_ID")
+DRIVERS_TABLE_ID = os.getenv("DRIVERS_TABLE_ID")
+ZAPIER_CUSTOMER_HOOK = os.getenv("ZAPIER_CUSTOMER_HOOK")
+ZAPIER_DRIVER_HOOK = os.getenv("ZAPIER_DRIVER_HOOK")
+ZAPIER_ORDER_HOOK = os.getenv("ZAPIER_ORDER_HOOK")
 
 
 # Airtable API endpoint
@@ -24,10 +33,10 @@ def fetch_data(user_type):
         "Authorization": f"Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}"
     }
 
-    if user_type == "Driver":
+    if user_type == "Customer":
         response = requests.get(AIRTABLE_CUSTOMERS_ENDPOINT, headers=headers)
 
-    if user_type == "Customer":
+    if user_type == "Driver":
             response = requests.get(AIRTABLE_DRIVERS_ENDPOINT, headers=headers)
 
     data = response.json()
@@ -96,7 +105,7 @@ def register_user():
 
         # Extract emails from records
         emails = extract_emails(records)
-
+        
         if not first_name:
             st.error("First Name Field cannot be empty!")
             return
@@ -140,9 +149,9 @@ def register_user():
 
         if user_type == 'Customer':
             
-            response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3xn808b/", json=data)
+            response = requests.post(ZAPIER_CUSTOMER_HOOK, json=data)
         else:
-            response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3pd5gc3/", json=data)
+            response = requests.post(ZAPIER_DRIVER_HOOK, json=data)
 
         
         # Make HTTP POST request to Zapier webhook URL
@@ -195,7 +204,7 @@ def place_order():
         }
 
         # Make HTTP POST request to Zapier webhook URL
-        response = requests.post("https://hooks.zapier.com/hooks/catch/18001983/3x74eeu/", json=data)
+        response = requests.post(ZAPIER_ORDER_HOOK, json=data)
 
         if response.status_code == 200:
             st.success("Order placed successfully!")
