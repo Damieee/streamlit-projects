@@ -1,13 +1,20 @@
 import streamlit as st
 import requests
 
-# Airtable API credentials
-AIRTABLE_PERSONAL_ACCESS_TOKEN = 'pat0bujZD5PIV5Apc.51bb880c298b9768dfcbc0e0326f94ad9d6b6b3b7d2b880486179f01d54168c5'
-AIRTABLE_BASE_ID = 'app8pgQ8UWEiusMHE'
-ORDERS_TABLE_ID = 'tbl0fdZ87VI2WGrip'
-CUSTOMERS_TABLE_ID = 'tblLY6iolwFQ7sCXG'
-DRIVERS_TABLE_ID = 'tblBYefamOYeuLmIK'
+import os
+from dotenv import find_dotenv, load_dotenv
 
+dotenv_path = find_dotenv()
+
+load_dotenv(dotenv_path=dotenv_path)
+
+
+# Airtable API credentials
+AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+CUSTOMERS_TABLE_ID = os.getenv("CUSTOMERS_TABLE_ID")
+DRIVERS_TABLE_ID = os.getenv("DRIVERS_TABLE_ID")
+ORDERS_TABLE_ID = os.getenv("ORDERS_TABLE_ID")
 
 # Airtable API endpoint
 AIRTABLE_ORDER_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{ORDERS_TABLE_ID}"

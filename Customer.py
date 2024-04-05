@@ -1,14 +1,21 @@
 import streamlit as st
 import requests
+import os
+from dotenv import find_dotenv, load_dotenv
+
+dotenv_path = find_dotenv()
+
+load_dotenv(dotenv_path=dotenv_path)
+
 
 # Airtable API credentials
-AIRTABLE_PERSONAL_ACCESS_TOKEN = 'pat0bujZD5PIV5Apc.51bb880c298b9768dfcbc0e0326f94ad9d6b6b3b7d2b880486179f01d54168c5'
-AIRTABLE_BASE_ID = 'app8pgQ8UWEiusMHE'
-TABLE_ID = 'tbl0fdZ87VI2WGrip'
+AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+ORDERS_TABLE_ID = os.getenv("ORDERS_TABLE_ID")
 
 
 # Airtable API endpoint
-AIRTABLE_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{TABLE_ID}"
+AIRTABLE_ENDPOINT = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{ORDERS_TABLE_ID}"
 
 # Function to fetch data from Airtable
 def fetch_data():
