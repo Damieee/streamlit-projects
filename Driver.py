@@ -56,7 +56,7 @@ def update_ride_status(driver_email, order_id, new_status):
         order_status = record['fields']['Order Status']
 
         if new_status == 'Accepted' and order_status != 'Pending':
-            st.write('Sorry, you can no longer accept this order. This order has already been accepted.')
+            st.write('Sorry, you can no longer accept this order. It was either previously accepted or cancelled.')
             return
         
         if new_status == 'Completed' and order_status != 'Accepted':
